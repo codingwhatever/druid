@@ -19,8 +19,8 @@ package io.druid.query.search.search;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.google.common.base.Objects;
 import com.metamx.common.StringUtils;
+
 import java.nio.ByteBuffer;
 import java.util.regex.Pattern;
 
@@ -32,6 +32,7 @@ public class RegexSearchQuerySpec implements SearchQuerySpec
   private static final byte CACHE_TYPE_ID = 0x3;
 
   private final String pattern;
+  private Pattern compiled;
 
   @JsonCreator
   public RegexSearchQuerySpec(
@@ -39,6 +40,7 @@ public class RegexSearchQuerySpec implements SearchQuerySpec
   )
   {
     this.pattern = pattern;
+    compiled = Pattern.compile(pattern);
   }
 
   @JsonProperty
@@ -48,14 +50,35 @@ public class RegexSearchQuerySpec implements SearchQuerySpec
   }
 
   @Override
+  public boolean equals(Object o)
+  {
+    if (this == o) {
+      return true;
+    }
+    if (!(o instanceof RegexSearchQuerySpec)) {
+      return false;
+    }
+
+    RegexSearchQuerySpec that = (RegexSearchQuerySpec) o;
+
+    return !(pattern != null ? !pattern.equals(that.pattern) : that.pattern != null);
+
+  }
+
+  @Override
+  public int hashCode()
+  {
+    return pattern != null ? pattern.hashCode() : 0;
+  }
+
+  @Override
   public boolean accept(String dimVal)
   {
     if (dimVal == null || pattern == null) {
       return false;
     }
 
-    Pattern compiled = Pattern.compile(pattern);
-    return compiled.matcher(dimVal).find(); 
+    return compiled.matcher(dimVal).find();
   }
 
   @Override
@@ -81,28 +104,4 @@ public class RegexSearchQuerySpec implements SearchQuerySpec
            "pattern=" + pattern + "}";
   }
 
-  @Override
-  public boolean equals(Object o)
-  {
-    if (this == o) {
-      return true;
-    }
-    if (o == null || getClass() != o.getClass()) {
-      return false;
-    }
-
-    RegexSearchQuerySpec that = (RegexSearchQuerySpec) o;
-
-    if (pattern == null && that.pattern == null) {
-      return true;
-    }
-
-    return pattern != null && pattern.equals(that.pattern);
-  }
-
-  @Override
-  public int hashCode()
-  {
-    return Objects.hashCode(pattern);
-  }
 }

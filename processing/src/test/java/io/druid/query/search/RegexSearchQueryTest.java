@@ -19,11 +19,6 @@ package io.druid.query.search;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.druid.jackson.DefaultObjectMapper;
-import io.druid.query.Druids;
-import io.druid.query.Query;
-import io.druid.query.QueryRunnerTestHelper;
-import io.druid.query.dimension.DefaultDimensionSpec;
-import io.druid.query.dimension.LegacyDimensionSpec;
 import io.druid.query.search.search.RegexSearchQuerySpec;
 import org.junit.Assert;
 import org.junit.Test;
@@ -37,16 +32,19 @@ public class RegexSearchQueryTest
   @Test
   public void testQuerySerialization() throws IOException
   {
-    Query query = Druids.newSearchQueryBuilder()
-                        .dataSource(QueryRunnerTestHelper.dataSource)
-                        .granularity(QueryRunnerTestHelper.allGran)
-                        .intervals(QueryRunnerTestHelper.fullOnInterval)
-                        .query(new RegexSearchQuerySpec("(upfront|total_market)"))
-                        .build();
+    RegexSearchQuerySpec spec = new RegexSearchQuerySpec("(upfront|total_market)");
 
-    String json = jsonMapper.writeValueAsString(query);
-    Query serdeQuery = jsonMapper.readValue(json, Query.class);
+    String json = jsonMapper.writeValueAsString(spec);
+    RegexSearchQuerySpec serdeQuery = jsonMapper.readValue(json, RegexSearchQuerySpec.class);
 
-    Assert.assertEquals(query, serdeQuery);
+    Assert.assertEquals(spec, serdeQuery);
+  }
+
+  @Test
+  public void testRegexCompare()
+  {
+    RegexSearchQuerySpec rsq = new RegexSearchQuerySpec("^a.*b");
+    Assert.assertTrue(rsq.accept("aabb"));
+    Assert.assertFalse(rsq.accept("babba"));
   }
 }
