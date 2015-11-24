@@ -20,7 +20,7 @@ package io.druid.query.search.search;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Objects;
-
+import com.metamx.common.StringUtils;
 import java.nio.ByteBuffer;
 import java.util.regex.Pattern;
 
@@ -29,13 +29,13 @@ import java.util.regex.Pattern;
 public class RegexSearchQuerySpec implements SearchQuerySpec
 {
 
-  private static final byte CACHE_TYPE_ID = 0x1;
+  private static final byte CACHE_TYPE_ID = 0x3;
 
   private final String pattern;
 
   @JsonCreator
   public RegexSearchQuerySpec(
-      @JsonProperty("pattern") String pattern,
+      @JsonProperty("pattern") String pattern
   )
   {
     this.pattern = pattern;
@@ -63,7 +63,7 @@ public class RegexSearchQuerySpec implements SearchQuerySpec
   {
     if (pattern == null) {
       return ByteBuffer.allocate(1)
-                       .put(CACHE_TYPE_ID);
+                       .put(CACHE_TYPE_ID).array();
     }
 
     byte[] patternBytes = StringUtils.toUtf8(pattern);
